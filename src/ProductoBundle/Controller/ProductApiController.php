@@ -33,26 +33,47 @@ use ProductoBundle\Entity\Producto;
     * Creates a new producto entity.
     *
     * @Route("/product/api/new", name="producto_new_api")
-    * @Method({"GET", "POST"})
+    * @Method("POST")
     */
 
-	public function newAction(Request $request)
+public function newAction(Request $r)
     {
-        $productos = new Producto();
-        $form = $this->createForm('ProductoBundle\Form\ProductoApiType', $productos);
-        $form->handleRequest($request);
-        $response=new Response();
-	    $response->headers->add(['Content-Type'=>'application/json']);
-	   
-	 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($productos);
-            $em->flush();
-
+        $product = new Producto();
+        $form = $this->createForm(
+            'ProductoBundle\Form\ProductoApiType',
+            $product,
+            [
+                'csrf_protection' => false
+            ]
+        );
+        $form->bind($r);
+        $valid = $form->isValid();
+        $response = new Response();
+        if(false === $valid){
+            $response->setStatusCode(400);
+            $response->setContent(json_encode($this->getFormErrors($form)));
+            return $response;
         }
+        if (true === $valid) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($product);
+            $em->flush();
+            $response->setContent(json_encode($product));
+        }
+        return $response;
+    }
 
- 		$response->setContent(json_encode($productos));
-	    return $response;
+    
+    public function getFormErrors($form){
+        $errors = [];
+        if (0 === $form->count()){
+            return $errors;
+        }
+        foreach ($form->all() as $child) {
+            if (!$child->isValid()) {
+                $errors[$child->getName()] = (string) $form[$child->getName()]->getErrors();
+            }
+        }
+        return $errors;
     }
 }
