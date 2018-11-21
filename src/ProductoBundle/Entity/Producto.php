@@ -27,29 +27,29 @@ class Producto implements ProductInterface
 
     /**
      * @var string
-     *
+     * @Assert\NotBlank
      * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
 
     /**
      * @var float
-     *
+     * @Assert\NotBlank
      * @ORM\Column(name="price", type="float")
      */
     private $price;
 
     /**
      * @var int
-     *
+     * 
      * @ORM\Column(name="stock", type="integer")
      */
     private $stock;
 
     /**
      * @var arrayColection
-     * @ORM\ManyToMany(targetEntity="Category", inversedBy="producto")
-     * @ORM\JoinTable (name="producto_category")
+     * @ORM\ManyToMany(targetEntity="Category", inversedBy="products")
+     * @ORM\JoinTable (name="product_category")
      */
     private $categorias=null;
 
